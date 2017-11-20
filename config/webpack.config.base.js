@@ -1,5 +1,6 @@
 var webpack = require('webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var path = require('path')
 
 var outputFile = 'v-com'
 var globalName = 'VCom'
@@ -28,6 +29,7 @@ module.exports = {
             css: ExtractTextPlugin.extract('css-loader'),
             sass: ExtractTextPlugin.extract('css-loader!sass-loader'),
             scss: ExtractTextPlugin.extract('css-loader!sass-loader'),
+            less: ExtractTextPlugin.extract('css-loader!less-loader'),
           },
         },
       },
@@ -39,4 +41,10 @@ module.exports = {
     }),
     new ExtractTextPlugin(outputFile + '.css'),
   ],
+  resolve: {
+    extensions: ['.js', '.vue', '.json'],
+    alias: {
+      '@src': path.resolve(__dirname, '../src'),
+    }
+  },
 }

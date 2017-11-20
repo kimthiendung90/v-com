@@ -91,7 +91,7 @@ export default {
       default: ''
     },
     firstDayOfWeek: {
-      default: 7,
+      default: 1,
       type: Number,
       validator: val => val >= 1 && val <= 7
     },
@@ -128,7 +128,8 @@ export default {
         if (!this.range) {
           this.currentValue = this.isValidDate(val) ? val : undefined
         } else {
-          this.currentValue = this.isValidRange(val) ? val.slice(0, 2) : [undefined, undefined]
+          // default 30 days
+          this.currentValue = this.isValidRange(val) ? val.slice(0, 2) : [undefined, new Date(Date.now() + 3600 * 1000 * 24 * 30)]
         }
       },
       immediate: true
@@ -161,7 +162,6 @@ export default {
       const val = this.currentValue
       if ((!this.range && val) || (this.range && val[0] && val[1])) {
         this.$emit('input', val)
-        console.log(this.value, this.currentValue)
       }
     },
     confirmDate () {

@@ -1,17 +1,20 @@
 import DatePicker from './components/vue2-datepicker'
-import VueGoodTable from './components/vue-good-table/vue-good-table.min.js';
+import DataTable from './components/vue-good-table/Table.vue';
+import Treeselect from './components/tree-select/index.js';
 
 // Install the components
 export function install (Vue) {
   Vue.component('datePicker', DatePicker);
-  Vue.component('vueGoodTable', VueGoodTable);
+  Vue.component('dataTable', DataTable);
+  Vue.component('treeselect', Treeselect);
   /* -- Add more components here -- */
 }
 
 // Expose the components
 export {
   DatePicker,
-  VueGoodTable,
+  DataTable,
+  Treeselect,
   /* -- Add more components here -- */
 }
 

@@ -9,13 +9,29 @@
 
 <body>
     <div id="app">
-        <date-picker v-model="rangeTime" range confirm></date-picker>
+
+        <treeselect
+        :multiple="true"
+        :options="options"
+        placeholder="Select your favourite(s)..."
+        v-model="value">
+        </treeselect>
+
         <hr/>
-        <vue-good-table
+        
+        <date-picker
+        v-model="rangeTime"
+        range confirm>
+        </date-picker>
+
+        <hr/>
+
+        <data-table
         style-class="table table-bordered table-striped"
         :columns="columns"
         :paginate="true"
-        :rows="rows"/>
+        :rows="rows">
+        </data-table>
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
@@ -26,7 +42,24 @@
             components: {VCom},
             data: function(){
                 return {
+                    value: [],
+                    options: [ {
+                        id: 'a',
+                        label: 'a',
+                        children: [ {
+                        id: 'aa',
+                        label: 'aa',
+                        }, {
+                        id: 'ab',
+                        label: 'ab',
+                        } ],
+                    }, {
+                        id: 'b',
+                        label: 'b',
+                    } ],
+                    //
                     rangeTime: '',
+                    //
                     columns: [
                         {
                             label: 'Name',
@@ -43,7 +76,7 @@
                             field: 'joined',
                             type: 'date',
                             inputFormat: 'YYYYMMDD',
-                            outputFormat: 'MMM Do YYYY',
+                            outputFormat: 'YYYY-MM-DD',
                         },
                         ],
                     rows: [
