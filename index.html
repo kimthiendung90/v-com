@@ -9,8 +9,13 @@
 
 <body>
     <div id="app">
-        <date-picker v-model="time1" :first-day-of-week="1"></date-picker>
-        <date-picker v-model="time2" range></date-picker>
+        <date-picker v-model="rangeTime" range confirm></date-picker>
+        <hr/>
+        <vue-good-table
+        style-class="table table-bordered table-striped"
+        :columns="columns"
+        :paginate="true"
+        :rows="rows"/>
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
@@ -21,22 +26,36 @@
             components: {VCom},
             data: function(){
                 return {
-                    time1: '',
-                    time2: '',
-                    shortcuts: [
+                    rangeTime: '',
+                    columns: [
                         {
-                        text: 'Today',
-                        start: new Date(),
-                        end: new Date()
-                        }
-                    ]
+                            label: 'Name',
+                            field: 'name',
+                            filterable: true,
+                        },
+                        {
+                            label: 'Age',
+                            field: 'age',
+                            type: 'number',
+                        },
+                        {
+                            label: 'Joined On',
+                            field: 'joined',
+                            type: 'date',
+                            inputFormat: 'YYYYMMDD',
+                            outputFormat: 'MMM Do YYYY',
+                        },
+                        ],
+                    rows: [
+                        {name:"John", age:20, joined: '20120201'},
+                        {name:"Jane", age:24, joined: '20120305'},
+                        {name:"Susan", age:16, joined: '20140823'},
+                        {name:"Chris", age:55, joined: '20161109'},
+                        {name:"Dan", age:40, joined: '20170612'},
+                    ],
                 }
             },
             methods: {
-                day5nextMonth: function() {
-                    var now = new Date();
-                    return new Date(now.getFullYear(), now.getMonth()+1, 5);
-                }
             },
 
         })

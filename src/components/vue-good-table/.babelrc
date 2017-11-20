@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["es2015", { "modules": false }],
+    "env"
+  ],
+  "plugins": ["transform-runtime"],
+  "comments": false,
+  "env": {
+    "test": {
+      "presets": ["env"],
+      "plugins": [ "istanbul" ]
+    }
+  }
+}
