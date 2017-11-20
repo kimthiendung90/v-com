@@ -3,6 +3,8 @@ var merge = require('webpack-merge')
 var base = require('./webpack.config.base')
 var path = require('path')
 
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+
 var outputFile = 'v-com'
 var globalName = 'VCom'
 
@@ -14,16 +16,10 @@ module.exports = merge(base, {
     libraryTarget: 'umd',
   },
   externals: {
-    // Put external libraries like lodash here
-    // With their global name
-    // Example: 'lodash': '_'
+    vue: 'vue',
+    moment: 'moment'
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: true,
-      },
-      mangle: false,
-    }),
+    new UglifyJSPlugin(),
   ],
 })

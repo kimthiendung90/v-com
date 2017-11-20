@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Component Framework</title>
+    <link rel="stylesheet" href="./dist/v-com.css">
+</head>
+
+<body>
+    <div id="app">
+        <date-picker v-model="time1" :first-day-of-week="1"></date-picker>
+        <date-picker v-model="time2" range></date-picker>
+    </div>
+    <script src="./core/vue.min.js"></script>
+    <script src="./dist/v-com.browser.js"></script>
+    <script>
+        console.log(VCom)
+        new Vue({
+            el: "#app",
+            components: {VCom},
+            data: function(){
+                return {
+                    time1: '',
+                    time2: '',
+                    shortcuts: [
+                        {
+                        text: 'Today',
+                        start: new Date(),
+                        end: new Date()
+                        }
+                    ]
+                }
+            },
+            methods: {
+                day5nextMonth: function() {
+                    var now = new Date();
+                    return new Date(now.getFullYear(), now.getMonth()+1, 5);
+                }
+            },
+
+        })
+            
+    </script>
+</body>
+
+</html>

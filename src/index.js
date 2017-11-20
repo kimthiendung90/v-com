@@ -1,14 +1,14 @@
-import Test from './components/Test.vue'
+import DatePicker from './components/vue2-datepicker'
 
 // Install the components
 export function install (Vue) {
-  Vue.component('test', Test)
+  Vue.component('datePicker', DatePicker);
   /* -- Add more components here -- */
 }
 
 // Expose the components
 export {
-  Test,
+  DatePicker,
   /* -- Add more components here -- */
 }
 
