@@ -663,6 +663,9 @@
     background-color: #fff;
     background-image: none;
     border: 1px solid #ccc;
+  }
+
+  .table input{
     box-shadow: inset 0 1px 1px rgba(35,41,53,.075);
   }
 
