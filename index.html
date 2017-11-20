@@ -18,7 +18,7 @@
         </treeselect>
 
         <hr/>
-        
+
         <date-picker
         v-model="rangeTime"
         range confirm>
@@ -30,7 +30,14 @@
         style-class="table table-bordered table-striped"
         :columns="columns"
         :paginate="true"
-        :rows="rows">
+        :rows="rows"
+        :defaultSortBy="{field: 'age', type: 'asc'}">
+            <template slot="table-row" scope="props">
+                <td class="fancy">{{ props.row.name }}</td>
+                <td class="has-text-right">{{ props.row.age }}</td>
+                <td class="has-text-right">{{ props.row.joined }}</td>
+                <td class="has-text-right">edit {{ props.row.name }}</td>
+            </template>
         </data-table>
     </div>
     <script src="./core/vue.min.js"></script>
@@ -77,6 +84,9 @@
                             type: 'date',
                             inputFormat: 'YYYYMMDD',
                             outputFormat: 'YYYY-MM-DD',
+                        },
+                        {
+                            label: 'Action'
                         },
                         ],
                     rows: [
