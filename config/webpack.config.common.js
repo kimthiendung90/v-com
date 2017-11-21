@@ -2,6 +2,7 @@ var webpack = require('webpack')
 var merge = require('webpack-merge')
 var base = require('./webpack.config.base')
 var path = require('path')
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 var outputFile = 'v-com'
 var globalName = 'VCom'
@@ -19,11 +20,6 @@ module.exports = merge(base, {
     // Example: 'lodash': 'lodash'
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: true,
-      },
-      mangle: false,
-    }),
+    new UglifyJSPlugin(),
   ],
 })

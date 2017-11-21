@@ -3,7 +3,11 @@
     <div :class="{'responsive': responsive}">
       <div v-if="title" class="table-header clearfix">
         <h2 class="table-title pull-left">{{title}}</h2>
-        <div class="actions pull-right">
+      </div>
+
+      <div class="actions clearfix">
+        <div v-if="csvExport" class="pull-left">
+          <button class="btn" @click="csvHandle">CSV Export</button>
         </div>
       </div>
 
@@ -118,474 +122,544 @@
 </template>
 
 <script>
-  import {format, parse, compareAsc, isValid} from 'date-fns'
-  import VueGoodPagination from './Pagination.vue'
-  
-  export default {
-    name: 'vue-good-table',
-    components: {
-      VueGoodPagination
-    },
-    props: {
-      styleClass: {default: 'table table-bordered'},
-      title: '',
-      columns: {},
-      rows: {},
-      onClick: {},
-      perPage: {},
-      sortable: {default: true},
-      paginate: {default: false},
-      lineNumbers: {default: false},
-      defaultSortBy: {default: null},
-      responsive: {default: true},
-      rtl: {default: false},
-      rowStyleClass: {default: null, type: [Function, String]},
+import { format, parse, compareAsc, isValid } from "date-fns";
+import VueGoodPagination from "./Pagination.vue";
 
-      // search
-      globalSearch: {default: false},
-      searchTrigger: {default: null},
-      externalSearchQuery: {default: null},
+export default {
+  name: "vue-good-table",
+  components: {
+    VueGoodPagination
+  },
+  props: {
+    styleClass: { default: "table table-bordered" },
+    title: "",
+    columns: {},
+    rows: {},
+    onClick: {},
+    perPage: {},
+    csvExport: { default: false },
+    sortable: { default: true },
+    paginate: { default: false },
+    lineNumbers: { default: false },
+    defaultSortBy: { default: null },
+    responsive: { default: true },
+    rtl: { default: false },
+    rowStyleClass: { default: null, type: [Function, String] },
 
-      // text options
-      globalSearchPlaceholder: {default: 'Search ...'}
-    },
+    // search
+    globalSearch: { default: false },
+    searchTrigger: { default: null },
+    externalSearchQuery: { default: null },
 
-    data: () => ({
-      currentPage: 1,
-      currentPerPage: 10,
-      sortColumn: -1,
-      sortType: 'asc',
-      globalSearchTerm: '',
-      columnFilters: {},
-      filteredRows: [],
-      timer: null,
-      forceSearch: false,
-      sortChanged: false,
-    }),
+    // text options
+    globalSearchPlaceholder: { default: "Search ..." }
+  },
 
-    methods: {
+  data: () => ({
+    currentPage: 1,
+    currentPerPage: 10,
+    sortColumn: -1,
+    sortType: "asc",
+    globalSearchTerm: "",
+    columnFilters: {},
+    filteredRows: [],
+    timer: null,
+    forceSearch: false,
+    sortChanged: false
+  }),
 
-      pageChanged(pagination) {
-        this.currentPage = pagination.currentPage;
-        this.$emit('pageChanged', {currentPage: this.currentPage, total: Math.floor(this.rows.length / this.currentPerPage)});
-      },
+  methods: {
+    convertToCSV: function(args) {
+      var result, ctr, keys, columnDelimiter, lineDelimiter, data;
 
-      perPageChanged(pagination) {
-        this.currentPerPage = pagination.currentPerPage;
-      },
+      data = args.data || null;
+      if (data == null || !data.length) {
+        return null;
+      }
 
-      sort(index) {
-        if (!this.isSortableColumn(index))
-          return;
-        if (this.sortColumn === index) {
-          this.sortType = this.sortType === 'asc' ? 'desc' : 'asc';
-        } else {
-          this.sortType = 'asc';
-          this.sortColumn = index;
-        }
-        this.sortChanged = true;
-      },
+      columnDelimiter = args.columnDelimiter || ",";
+      lineDelimiter = args.lineDelimiter || "\n";
 
-      click(row, index) {
-        if (this.onClick)
-          this.onClick(row, index);
-      },
+      keys = Object.keys(data[0]);
 
-      searchTable() {
-        if(this.searchTrigger == 'enter') {
-          this.forceSearch = true;
-          this.sortChanged = true;
-        }
-      },
+      result = "";
+      result += keys.join(columnDelimiter);
+      result += lineDelimiter;
 
-      // field can be:
-      // 1. function
-      // 2. regular property - ex: 'prop'
-      // 3. nested property path - ex: 'nested.prop'
-      collect(obj, field) {
+      data.forEach(function(item) {
+        ctr = 0;
+        keys.forEach(function(key) {
+          if (ctr > 0) result += columnDelimiter;
 
-        //utility function to get nested property
-        function dig(obj, selector) {
-          var result = obj;
-          const splitter = selector.split('.');
-          for (let i = 0; i < splitter.length; i++)
-            if (typeof(result) === 'undefined')
-              return undefined;
-            else
-              result = result[splitter[i]];
-          return result;
-        }
-
-        if (typeof(field) === 'function')
-          return field(obj);
-        else if (typeof(field) === 'string')
-          return dig(obj, field);
-        else
-          return undefined;
-      },
-
-      collectFormatted(obj, column) {
-        //helper functions within collect
-        function formatDecimal(v) {
-          return parseFloat(Math.round(v * 100) / 100).toFixed(2);
-        }
-
-        function formatPercent(v) {
-          return parseFloat(v * 100).toFixed(2) + '%';
-        }
-
-        function formatDate(v) {
-          // convert to date
-          return format(parse(v, column.inputFormat, new Date()), column.outputFormat);
-        }
-
-        var value = this.collect(obj, column.field);
-
-        if (value === undefined) return '';
-        //lets format the resultant data
-        switch(column.type) {
-          case 'decimal':
-            return formatDecimal(value);
-          case 'percentage':
-            return formatPercent(value);
-          case 'date':
-            return formatDate(value);
-          default:
-            return value;
-        }
-      },
-
-      formattedRow(row) {
-        var formattedRow = {};
-        for (const col of this.columns) {
-          if (col.field) {
-            formattedRow[col.field] = this.collectFormatted(row, col);
-          }
-        }
-        return formattedRow;
-      },
-
-      //Check if a column is sortable.
-      isSortableColumn(index) {
-        const sortable = this.columns[index].sortable;
-        const isSortable = typeof sortable === 'boolean' ? sortable : this.sortable;
-        return isSortable;
-      },
-
-      //Get classes for the given header column.
-      getHeaderClasses(column, index) {
-        const isSortable = this.isSortableColumn(index);
-        const classes = Object.assign({}, this.getClasses(index, 'th'), {
-          'sorting': isSortable,
-          'sorting-desc': isSortable && this.sortColumn === index && this.sortType === 'desc',
-          'sorting-asc': isSortable && this.sortColumn === index && this.sortType === 'asc',
+          result += item[key];
+          ctr++;
         });
-        return classes;
-      },
+        result += lineDelimiter;
+      });
 
-      //Get classes for the given column index & element.
-      getClasses(index, element) {
-        const { type, [element + 'Class']: custom } = this.columns[index];
-        let isRight = ['number', 'percentage', 'decimal', 'date'].includes(type);
-        if (this.rtl) isRight = true;
-        const classes = {
-          'right-align': isRight,
-          'left-align': !isRight,
-          [custom]: !!custom
-        };
-        return classes;
-      },
-
-      //since vue doesn't detect property addition and deletion, we
-      // need to create helper function to set property etc
-      updateFilters(column, value) {
-        const _this = this;
-        if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(function(){
-          _this.$set(_this.columnFilters, column.field, value)
-        }, 400);
-
-      },
-
-      //method to filter rows
-      filterRows() {
-        var computedRows = JSON.parse(JSON.stringify(this.rows));
-        // we need to preserve the original index of rows so lets do that
-        for(const [index, row] of computedRows.entries()) {
-          row.originalIndex = index;
-        }
-
-        if(this.hasFilterRow) {
-          for (var col of this.columns){
-            if (col.filterable && this.columnFilters[col.field]) {
-              computedRows = computedRows.filter(row => {
-
-                // If column has a custom filter, use that.
-
-                if (col.filter) {
-                    return col.filter(this.collect(row, col.field), this.columnFilters[col.field])
-                }
-
-                // Use default filters
-
-                switch(col.type) {
-                  case 'number':
-                  case 'percentage':
-                  case 'decimal':
-                    //in case of numeric value we need to do an exact
-                    //match for now`
-                    return this.collect(row, col.field) == this.columnFilters[col.field];
-                  default:
-                    //text value lets test starts with
-                    return this.collect(row, col.field)
-                      .toLowerCase()
-                      .startsWith(
-                        (this.columnFilters[col.field]).toLowerCase()
-                      );
-                }
-              });
-            }
-          }
-        }
-        this.filteredRows = computedRows;
-      },
-
-      //get column's defined placeholder or default one
-      getPlaceholder(column) {
-        const placeholder = column.placeholder || 'Filter ' + column.label
-        return placeholder
-      },
-
-      getCurrentIndex(index) {
-        return (this.currentPage - 1) * this.currentPerPage + index + 1;
-      },
-
-      getRowStyleClass(row) {
-        let classes = '';
-        this.onClick ? classes += 'clickable' : '';
-        let rowStyleClasses;
-        if (typeof this.rowStyleClass === 'function') {
-          rowStyleClasses = this.rowStyleClass(row);
-        } else {
-          rowStyleClasses = this.rowStyleClass;
-        }
-        if (rowStyleClasses) {
-          classes += ' ' + rowStyleClasses;
-        }
-        return classes;
-      }
+      return result;
     },
+    csvHandle: function(users) {
+      var mimeType = "data:text/csv;charset=utf-8";
+      if (Array.isArray(this.rows) && this.rows.length > 0) {
 
-    watch: {
-      columnFilters: {
-          handler: function(newObj){
-            this.filterRows();
-          },
-          deep: true
-      },
-      rows: {
-        handler: function(newObj){
-          this.filterRows();
-        },
-        deep: true
-      }
+        const docName = this.title != "" ? this.title.replace(/ /g, "-") : "Csv";
+        const d = new Date();
 
-    },
+        var content = this.convertToCSV({data: this.rows});
+        if (content == null) return;
 
-    computed: {
-
-      searchTerm(){
-        return (this.externalSearchQuery != null) ? this.externalSearchQuery : this.globalSearchTerm;
-      },
-
-      //
-      globalSearchAllowed() {
-        if (this.globalSearch
-          && !!this.globalSearchTerm
-          && this.searchTrigger != 'enter'){
-          return true;
-        }
-
-        if (this.externalSearchQuery != null
-           && this.searchTrigger != 'enter'){
-          return true;
-        }
-
-        if (this.forceSearch){
-          this.forceSearch = false;
-          return true;
-        }
-
+        var dummy = document.createElement("a");
+        dummy.href = mimeType + ", " + encodeURI(content);
+        dummy.download =
+          docName + "-" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate()
+          + "-" + d.getHours() + "-" + d.getMinutes() + "-" + d.getSeconds() + ".csv";
+        dummy.click();
+      } else {
+        alert("No data!!");
         return false;
-      },
-
-      // to create a filter row, we need to
-      // make sure that there is atleast 1 column
-      // that requires filtering
-      hasFilterRow(){
-        if (!this.globalSearch) {
-          for(var col of this.columns){
-            if(col.filterable){
-              return true;
-            }
-          }
-        }
-        return false;
-      },
-
-      // this is done everytime sortColumn
-      // or sort type changes
-      //----------------------------------------
-      processedRows() {
-       var computedRows = this.filteredRows;
-
-        // take care of the global filter here also
-        if (this.globalSearchAllowed) {
-          var filteredRows = [];
-          for (var row of this.rows) {
-            for(var col of this.columns) {
-              if (String(this.collectFormatted(row, col)).toLowerCase()
-                  .search(this.searchTerm.toLowerCase()) > -1) {
-                filteredRows.push(row);
-                break;
-              }
-            }
-          }
-          computedRows = filteredRows;
-        }
-
-        //taking care of sort here only if sort has changed
-        if (this.sortColumn !== -1 && this.isSortableColumn(this.sortColumn) &&
-
-          // if search trigger is enter then we only sort
-          // when enter is hit
-          (this.searchTrigger !== 'enter' || this.sortChanged)) {
-
-          this.sortChanged = false;
-
-          computedRows = computedRows.sort((x,y) => {
-            if (!this.columns[this.sortColumn])
-              return 0;
-
-            const cook = (d) => {
-              d = this.collect(d, this.columns[this.sortColumn].field);
-
-              //take care of dates too.
-              if (this.columns[this.sortColumn].type === 'date') {
-                d = parse(d + '', this.columns[this.sortColumn].inputFormat, new Date());
-              } else if (typeof(d) === 'string') {
-                d = d.toLowerCase();
-                if (this.columns[this.sortColumn].type === 'number')
-                  d = d.indexOf('.') >= 0 ? parseFloat(d) : parseInt(d);
-              }
-              return d;
-            }
-
-            x = cook(x);
-            y = cook(y);
-
-            // date comparison here
-            if (this.columns[this.sortColumn].type === 'date') {
-              if (!isValid(x)) {
-                return -1 * (this.sortType === 'desc' ? -1 : 1);
-              }
-              if (!isValid(y)) {
-                return (this.sortType === 'desc' ? -1 : 1);
-              }
-              return (compareAsc(x, y)) * (this.sortType === 'desc' ? -1 : 1);
-            }
-
-            // regular comparison here
-            return (x < y ? -1 : (x > y ? 1 : 0)) * (this.sortType === 'desc' ? -1 : 1);
-          })
-        }
-
-        // if the filtering is event based, we need to maintain filter
-        // rows
-        if (this.searchTrigger === 'enter') {
-          this.filteredRows = computedRows;
-        }
-
-        return computedRows;
-      },
-
-      paginated() {
-        var paginatedRows = this.processedRows;
-
-        if (this.paginate) {
-          var pageStart = (this.currentPage - 1) * this.currentPerPage;
-
-          // in case of filtering we might be on a page that is
-          // not relevant anymore
-          // also, if setting to all, current page will not be valid
-          if (pageStart >= this.processedRows.length
-            || this.currentPerPage === -1) {
-            this.currentPage = 1;
-            pageStart = 0;
-          }
-
-          //calculate page end now
-          var pageEnd = paginatedRows.length + 1;
-
-          //if the setting is set to 'all'
-          if (this.currentPerPage !== -1) {
-            pageEnd = this.currentPage * this.currentPerPage;
-          }
-
-          paginatedRows = paginatedRows.slice(pageStart, pageEnd);
-        }
-        return paginatedRows;
       }
     },
 
-    mounted() {
-      this.filteredRows = JSON.parse(JSON.stringify(this.rows));
+    pageChanged(pagination) {
+      this.currentPage = pagination.currentPage;
+      this.$emit("pageChanged", {
+        currentPage: this.currentPage,
+        total: Math.floor(this.rows.length / this.currentPerPage)
+      });
+    },
 
+    perPageChanged(pagination) {
+      this.currentPerPage = pagination.currentPerPage;
+    },
+
+    sort(index) {
+      if (!this.isSortableColumn(index)) return;
+      if (this.sortColumn === index) {
+        this.sortType = this.sortType === "asc" ? "desc" : "asc";
+      } else {
+        this.sortType = "asc";
+        this.sortColumn = index;
+      }
+      this.sortChanged = true;
+    },
+
+    click(row, index) {
+      if (this.onClick) this.onClick(row, index);
+    },
+
+    searchTable() {
+      if (this.searchTrigger == "enter") {
+        this.forceSearch = true;
+        this.sortChanged = true;
+      }
+    },
+
+    // field can be:
+    // 1. function
+    // 2. regular property - ex: 'prop'
+    // 3. nested property path - ex: 'nested.prop'
+    collect(obj, field) {
+      //utility function to get nested property
+      function dig(obj, selector) {
+        var result = obj;
+        const splitter = selector.split(".");
+        for (let i = 0; i < splitter.length; i++)
+          if (typeof result === "undefined") return undefined;
+          else result = result[splitter[i]];
+        return result;
+      }
+
+      if (typeof field === "function") return field(obj);
+      else if (typeof field === "string") return dig(obj, field);
+      else return undefined;
+    },
+
+    collectFormatted(obj, column) {
+      //helper functions within collect
+      function formatDecimal(v) {
+        return parseFloat(Math.round(v * 100) / 100).toFixed(2);
+      }
+
+      function formatPercent(v) {
+        return parseFloat(v * 100).toFixed(2) + "%";
+      }
+
+      function formatDate(v) {
+        // convert to date
+        return format(
+          parse(v, column.inputFormat, new Date()),
+          column.outputFormat
+        );
+      }
+
+      var value = this.collect(obj, column.field);
+
+      if (value === undefined) return "";
+      //lets format the resultant data
+      switch (column.type) {
+        case "decimal":
+          return formatDecimal(value);
+        case "percentage":
+          return formatPercent(value);
+        case "date":
+          return formatDate(value);
+        default:
+          return value;
+      }
+    },
+
+    formattedRow(row) {
+      var formattedRow = {};
+      for (const col of this.columns) {
+        if (col.field) {
+          formattedRow[col.field] = this.collectFormatted(row, col);
+        }
+      }
+      return formattedRow;
+    },
+
+    //Check if a column is sortable.
+    isSortableColumn(index) {
+      const sortable = this.columns[index].sortable;
+      const isSortable =
+        typeof sortable === "boolean" ? sortable : this.sortable;
+      return isSortable;
+    },
+
+    //Get classes for the given header column.
+    getHeaderClasses(column, index) {
+      const isSortable = this.isSortableColumn(index);
+      const classes = Object.assign({}, this.getClasses(index, "th"), {
+        sorting: isSortable,
+        "sorting-desc":
+          isSortable && this.sortColumn === index && this.sortType === "desc",
+        "sorting-asc":
+          isSortable && this.sortColumn === index && this.sortType === "asc"
+      });
+      return classes;
+    },
+
+    //Get classes for the given column index & element.
+    getClasses(index, element) {
+      const { type, [element + "Class"]: custom } = this.columns[index];
+      let isRight = ["number", "percentage", "decimal", "date"].includes(type);
+      if (this.rtl) isRight = true;
+      const classes = {
+        "right-align": isRight,
+        "left-align": !isRight,
+        [custom]: !!custom
+      };
+      return classes;
+    },
+
+    //since vue doesn't detect property addition and deletion, we
+    // need to create helper function to set property etc
+    updateFilters(column, value) {
+      const _this = this;
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(function() {
+        _this.$set(_this.columnFilters, column.field, value);
+      }, 400);
+    },
+
+    //method to filter rows
+    filterRows() {
+      var computedRows = JSON.parse(JSON.stringify(this.rows));
       // we need to preserve the original index of rows so lets do that
-      for(const [index, row] of this.filteredRows.entries()) {
+      for (const [index, row] of computedRows.entries()) {
         row.originalIndex = index;
       }
 
-      if (this.perPage) {
-        this.currentPerPage = this.perPage;
+      if (this.hasFilterRow) {
+        for (var col of this.columns) {
+          if (col.filterable && this.columnFilters[col.field]) {
+            computedRows = computedRows.filter(row => {
+              // If column has a custom filter, use that.
+
+              if (col.filter) {
+                return col.filter(
+                  this.collect(row, col.field),
+                  this.columnFilters[col.field]
+                );
+              }
+
+              // Use default filters
+
+              switch (col.type) {
+                case "number":
+                case "percentage":
+                case "decimal":
+                  //in case of numeric value we need to do an exact
+                  //match for now`
+                  return (
+                    this.collect(row, col.field) ==
+                    this.columnFilters[col.field]
+                  );
+                default:
+                  //text value lets test starts with
+                  return this.collect(row, col.field)
+                    .toLowerCase()
+                    .startsWith(this.columnFilters[col.field].toLowerCase());
+              }
+            });
+          }
+        }
+      }
+      this.filteredRows = computedRows;
+    },
+
+    //get column's defined placeholder or default one
+    getPlaceholder(column) {
+      const placeholder = column.placeholder || "Filter " + column.label;
+      return placeholder;
+    },
+
+    getCurrentIndex(index) {
+      return (this.currentPage - 1) * this.currentPerPage + index + 1;
+    },
+
+    getRowStyleClass(row) {
+      let classes = "";
+      this.onClick ? (classes += "clickable") : "";
+      let rowStyleClasses;
+      if (typeof this.rowStyleClass === "function") {
+        rowStyleClasses = this.rowStyleClass(row);
+      } else {
+        rowStyleClasses = this.rowStyleClass;
+      }
+      if (rowStyleClasses) {
+        classes += " " + rowStyleClasses;
+      }
+      return classes;
+    }
+  },
+
+  watch: {
+    columnFilters: {
+      handler: function(newObj) {
+        this.filterRows();
+      },
+      deep: true
+    },
+    rows: {
+      handler: function(newObj) {
+        this.filterRows();
+      },
+      deep: true
+    }
+  },
+
+  computed: {
+    searchTerm() {
+      return this.externalSearchQuery != null
+        ? this.externalSearchQuery
+        : this.globalSearchTerm;
+    },
+
+    //
+    globalSearchAllowed() {
+      if (
+        this.globalSearch &&
+        !!this.globalSearchTerm &&
+        this.searchTrigger != "enter"
+      ) {
+        return true;
       }
 
-      //take care of default sort on mount
-      if (this.defaultSortBy) {
-        for (let [index, col] of this.columns.entries()) {
-          if (col.field === this.defaultSortBy.field) {
-            this.sortColumn = index;
-            this.sortType = this.defaultSortBy.type || 'asc';
-            this.sortChanged = true;
-            break;
+      if (this.externalSearchQuery != null && this.searchTrigger != "enter") {
+        return true;
+      }
+
+      if (this.forceSearch) {
+        this.forceSearch = false;
+        return true;
+      }
+
+      return false;
+    },
+
+    // to create a filter row, we need to
+    // make sure that there is atleast 1 column
+    // that requires filtering
+    hasFilterRow() {
+      if (!this.globalSearch) {
+        for (var col of this.columns) {
+          if (col.filterable) {
+            return true;
           }
+        }
+      }
+      return false;
+    },
+
+    // this is done everytime sortColumn
+    // or sort type changes
+    //----------------------------------------
+    processedRows() {
+      var computedRows = this.filteredRows;
+
+      // take care of the global filter here also
+      if (this.globalSearchAllowed) {
+        var filteredRows = [];
+        for (var row of this.rows) {
+          for (var col of this.columns) {
+            if (
+              String(this.collectFormatted(row, col))
+                .toLowerCase()
+                .search(this.searchTerm.toLowerCase()) > -1
+            ) {
+              filteredRows.push(row);
+              break;
+            }
+          }
+        }
+        computedRows = filteredRows;
+      }
+
+      //taking care of sort here only if sort has changed
+      if (
+        this.sortColumn !== -1 &&
+        this.isSortableColumn(this.sortColumn) &&
+        // if search trigger is enter then we only sort
+        // when enter is hit
+        (this.searchTrigger !== "enter" || this.sortChanged)
+      ) {
+        this.sortChanged = false;
+
+        computedRows = computedRows.sort((x, y) => {
+          if (!this.columns[this.sortColumn]) return 0;
+
+          const cook = d => {
+            d = this.collect(d, this.columns[this.sortColumn].field);
+
+            //take care of dates too.
+            if (this.columns[this.sortColumn].type === "date") {
+              d = parse(
+                d + "",
+                this.columns[this.sortColumn].inputFormat,
+                new Date()
+              );
+            } else if (typeof d === "string") {
+              d = d.toLowerCase();
+              if (this.columns[this.sortColumn].type === "number")
+                d = d.indexOf(".") >= 0 ? parseFloat(d) : parseInt(d);
+            }
+            return d;
+          };
+
+          x = cook(x);
+          y = cook(y);
+
+          // date comparison here
+          if (this.columns[this.sortColumn].type === "date") {
+            if (!isValid(x)) {
+              return -1 * (this.sortType === "desc" ? -1 : 1);
+            }
+            if (!isValid(y)) {
+              return this.sortType === "desc" ? -1 : 1;
+            }
+            return compareAsc(x, y) * (this.sortType === "desc" ? -1 : 1);
+          }
+
+          // regular comparison here
+          return (
+            (x < y ? -1 : x > y ? 1 : 0) * (this.sortType === "desc" ? -1 : 1)
+          );
+        });
+      }
+
+      // if the filtering is event based, we need to maintain filter
+      // rows
+      if (this.searchTrigger === "enter") {
+        this.filteredRows = computedRows;
+      }
+
+      return computedRows;
+    },
+
+    paginated() {
+      var paginatedRows = this.processedRows;
+
+      if (this.paginate) {
+        var pageStart = (this.currentPage - 1) * this.currentPerPage;
+
+        // in case of filtering we might be on a page that is
+        // not relevant anymore
+        // also, if setting to all, current page will not be valid
+        if (
+          pageStart >= this.processedRows.length ||
+          this.currentPerPage === -1
+        ) {
+          this.currentPage = 1;
+          pageStart = 0;
+        }
+
+        //calculate page end now
+        var pageEnd = paginatedRows.length + 1;
+
+        //if the setting is set to 'all'
+        if (this.currentPerPage !== -1) {
+          pageEnd = this.currentPage * this.currentPerPage;
+        }
+
+        paginatedRows = paginatedRows.slice(pageStart, pageEnd);
+      }
+      return paginatedRows;
+    }
+  },
+
+  mounted() {
+    this.filteredRows = JSON.parse(JSON.stringify(this.rows));
+
+    // we need to preserve the original index of rows so lets do that
+    for (const [index, row] of this.filteredRows.entries()) {
+      row.originalIndex = index;
+    }
+
+    if (this.perPage) {
+      this.currentPerPage = this.perPage;
+    }
+
+    //take care of default sort on mount
+    if (this.defaultSortBy) {
+      for (let [index, col] of this.columns.entries()) {
+        if (col.field === this.defaultSortBy.field) {
+          this.sortColumn = index;
+          this.sortType = this.defaultSortBy.type || "asc";
+          this.sortChanged = true;
+          break;
         }
       }
     }
   }
+};
 </script>
 
 <style lang="css">
-
 /* Utility styles
 ************************************************/
-.right-align{
+.actions{
+  margin-bottom: .4rem;
+}
+
+.right-align {
   text-align: right;
 }
 
-.left-align{
+.left-align {
   text-align: left;
 }
 
-.center-align{
+.center-align {
   text-align: center;
 }
 
-.pull-left{
+.pull-left {
   float: left !important;
 }
 
-.pull-right{
+.pull-right {
   float: right !important;
 }
 
@@ -598,115 +672,122 @@
 /* Table specific styles
 ************************************************/
 
-  table{
-    border-collapse: collapse;
-    background-color: transparent;
-    margin-bottom: 0px;
-  }
-  .table{
-    width: 100%;
-    max-width: 100%;
-    table-layout: auto;
-  }
+table {
+  border-collapse: collapse;
+  background-color: transparent;
+  margin-bottom: 0px;
+}
+.table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: auto;
+}
 
-  .table-striped .table tbody tr:nth-of-type(odd) {
-      background-color: rgba(35,41,53,.02);
-  }
+.table-striped .table tbody tr:nth-of-type(odd) {
+  background-color: rgba(35, 41, 53, 0.02);
+}
 
-  .table-striped .table tbody tr:hover {
-      background-color: rgba(35,41,53,.075);
-  }
+.table-striped .table tbody tr:hover {
+  background-color: rgba(35, 41, 53, 0.075);
+}
 
-  .table-bordered .table td, .table-bordered th,
-  .table-bordered .table-footer {
-      border: 1px solid #ddd;
-  }
+.table-bordered .table td,
+.table-bordered th,
+.table-bordered .table-footer {
+  border: 1px solid #ddd;
+}
 
-  .table td, .table th:not(.line-numbers) {
-    padding: .75rem 1.2rem .75rem .75rem;
-    vertical-align: top;
-    border-top: 1px solid #ddd;
-  }
+.table td,
+.table th:not(.line-numbers) {
+  padding: 0.75rem 1.2rem 0.75rem 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
 
-  .rtl .table td, .rtl .table th:not(.line-numbers) {
-    padding: .75rem;
-  }
+.rtl .table td,
+.rtl .table th:not(.line-numbers) {
+  padding: 0.75rem;
+}
 
-  .table.condensed td, .table.condensed th {
-    padding: .4rem .4rem .4rem .4rem;
-  }
+.table.condensed td,
+.table.condensed th {
+  padding: 0.4rem 0.4rem 0.4rem 0.4rem;
+}
 
-  .table thead th, .table.condensed thead th {
-    cursor: pointer;
-    vertical-align: bottom;
-    padding-right: 1.5rem;
-    background-color: rgba(35,41,53,0.05);
-  }
-  .rtl .table thead th, .rtl .table.condensed thead th {
-    padding-left: 1rem;
-    padding-right: .75rem;
-  }
+.table thead th,
+.table.condensed thead th {
+  cursor: pointer;
+  vertical-align: bottom;
+  padding-right: 1.5rem;
+  background-color: rgba(35, 41, 53, 0.05);
+}
+.rtl .table thead th,
+.rtl .table.condensed thead th {
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
 
-  tr.clickable {
-    cursor: pointer;
-  }
+tr.clickable {
+  cursor: pointer;
+}
 
-  .table input, .table select{
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    height: 28px;
-    padding: 5px 10px;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #555;
-    background-color: #fff;
-    background-image: none;
-    border: 1px solid #ccc;
-  }
+.table input,
+.table select {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 28px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+}
 
-  .table input{
-    box-shadow: inset 0 1px 1px rgba(35,41,53,.075);
-  }
+.table input {
+  box-shadow: inset 0 1px 1px rgba(35, 41, 53, 0.075);
+}
 
-  table th.sorting-asc,
-  table th.sorting-desc {
-    color: rgba(0,0,0,.7);
-    position: relative;
-  }
+table th.sorting-asc,
+table th.sorting-desc {
+  color: rgba(0, 0, 0, 0.7);
+  position: relative;
+}
 
-  table th.sorting:after,
-  table th.sorting-asc:after  {
-    font-family: 'Material Icons';
-    position: absolute;
-    height: 0px;
-    width: 0px;
-    content: '';
-    display: none;
-    border: 4px solid transparent;
-    border-bottom: 6px solid rgba(0,0,0,.6);
-    margin-top: 2px;
-    margin-left: 4px;
-  }
+table th.sorting:after,
+table th.sorting-asc:after {
+  font-family: "Material Icons";
+  position: absolute;
+  height: 0px;
+  width: 0px;
+  content: "";
+  display: none;
+  border: 4px solid transparent;
+  border-bottom: 6px solid rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+  margin-left: 4px;
+}
 
-  .rtl table th.sorting:after,
-  .rtl table th.sorting-asc:after{
-    margin-right: 4px;
-    margin-left: 0;
-  }
+.rtl table th.sorting:after,
+.rtl table th.sorting-asc:after {
+  margin-right: 4px;
+  margin-left: 0;
+}
 
-  table th.sorting-asc:after,
-  table th.sorting-desc:after,
-  table th.sorting:hover:after {
-    display: inline-block;
-  }
+table th.sorting-asc:after,
+table th.sorting-desc:after,
+table th.sorting:hover:after {
+  display: inline-block;
+}
 
-  table th.sorting-desc:after {
-    border-bottom-color: transparent;
-    border: 4px solid transparent;
-    border-top: 6px solid rgba(0,0,0,.6);
-    margin-top: 6px;
-  }
+table th.sorting-desc:after {
+  border-bottom-color: transparent;
+  border: 4px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.6);
+  margin-top: 6px;
+}
 
 .responsive {
   width: 100%;
@@ -715,42 +796,78 @@
 /* Table header specific styles
 ************************************************/
 
-.table-header{
-  padding: .75rem;
+.table-header {
+  padding: 0.75rem;
 }
 
-.table-header .table-title{
+.table-header .table-title {
   margin: 0px;
   font-size: 18px;
 }
 
-  /* Global Search
+/* Global Search
   **********************************************/
-  .global-search{
-    position: relative;
-    margin-left: .45rem;
-  }
-  table .global-search-input{
-    width: 100%;
-  }
+.global-search {
+  position: relative;
+  margin-left: 0.45rem;
+}
+table .global-search-input {
+  width: 100%;
+}
 
-  /* Line numbers
+/* Line numbers
   **********************************************/
-  table th.line-numbers, .table.condensed th.line-numbers{
-    background-color: rgba(35,41,53,0.05);
-    padding-left: 3px;
-    padding-right: 3px;
-    word-wrap: break-word;
-    width: 45px;
-    text-align: center;
-  }
+table th.line-numbers,
+.table.condensed th.line-numbers {
+  background-color: rgba(35, 41, 53, 0.05);
+  padding-left: 3px;
+  padding-right: 3px;
+  word-wrap: break-word;
+  width: 45px;
+  text-align: center;
+}
 
-  .good-table.rtl{
-    direction: rtl;
-  }
+.good-table.rtl {
+  direction: rtl;
+}
 
-  .text-disabled{
-    color: #aaa;
-  }
+.text-disabled {
+  color: #aaa;
+}
 
+/* button
+  **********************************************/
+.table .btn {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: #fff;
+  border: .05rem solid #1976D2;
+  border-radius: .1rem;
+  color: #1976D2;
+  cursor: pointer;
+  display: inline-block;
+  font-size: .8rem;
+  height: 1.8rem;
+  line-height: 1rem;
+  outline: none;
+  padding: .35rem .4rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all .2s ease;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.table .btn:focus,.table .btn:hover {
+  background: #f1f1fc;
+  text-decoration: none;
+}
+.table .btn:active{
+  background-color: #1976D2;
+  color: #fff;
+}
 </style>
