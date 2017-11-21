@@ -40,6 +40,9 @@ module.exports = {
       'VERSION': JSON.stringify(config.version),
     }),
     new ExtractTextPlugin(outputFile + '.css'),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true
+    })
   ],
   resolve: {
     extensions: ['.js', '.vue', '.json'],

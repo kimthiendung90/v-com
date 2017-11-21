@@ -10,12 +10,12 @@
 <body>
     <div id="app">
 
-        <treeselect
+        <tree-select
         :multiple="true"
         :options="options"
         placeholder="Select your favourite(s)..."
         v-model="value">
-        </treeselect>
+        </tree-select>
 
         <hr/>
 
@@ -38,14 +38,22 @@
                 <td class="left-align">{{ props.row.name }}</td>
                 <td class="right-align">{{ props.formattedRow.age }}</td>
                 <td class="right-align">{{ props.formattedRow.joined }}</td>
-                <td class="left-align">edit {{ props.row.name }}</td>
+                <td class="left-align">
+                    edit {{ props.row.name }}
+                </td>
             </template>
         </data-table>
+
+        <hr/>
+
+        <button @click="showModal">edit</button>
+        <modal name="hello-world">
+            hello, world!
+        </modal>
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
     <script>
-        console.log(VCom)
         new Vue({
             el: "#app",
             components: {VCom},
@@ -101,6 +109,9 @@
                 }
             },
             methods: {
+                showModal () {
+                    this.$modal.show('hello-world');
+                }
             },
 
         })
