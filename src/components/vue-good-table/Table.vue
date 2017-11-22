@@ -687,8 +687,8 @@ table {
   background-color: rgba(35, 41, 53, 0.02);
 }
 
-.table-striped .table tbody tr:hover {
-  background-color: rgba(35, 41, 53, 0.075);
+.table tbody tr:hover {
+  background-color: rgba(188, 215, 241, 0.3) !important;
 }
 
 .table-bordered .table td,

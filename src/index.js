@@ -1,14 +1,14 @@
 import DatePicker from './components/vue2-datepicker'
 import DataTable from './components/vue-good-table/Table.vue';
 import TreeSelect from './components/tree-select/index.js';
-//import Modal from './components/modal/index.js';
+import Modal from './components/modal/index.js';
 
 // Install the components
 export function install (Vue) {
   Vue.component('datePicker', DatePicker);
   Vue.component('dataTable', DataTable);
   Vue.component('treeSelect', TreeSelect);
-  //Vue.component('modal', Modal);
+  Vue.use(Modal, { componentName: "modal", dialog: true });
   /* -- Add more components here -- */
 }
 
@@ -17,7 +17,7 @@ export {
   DatePicker,
   DataTable,
   TreeSelect,
-  //Modal,
+  Modal,
   /* -- Add more components here -- */
 }
 

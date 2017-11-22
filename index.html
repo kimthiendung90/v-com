@@ -14,13 +14,13 @@
         :multiple="true"
         :options="options"
         placeholder="Select your favourite(s)..."
-        v-model="value">
+        v-model="tsData">
         </tree-select>
 
         <hr/>
 
         <date-picker
-        v-model="rangeTime"
+        v-model="dpData"
         range confirm>
         </date-picker>
 
@@ -32,24 +32,32 @@
         csv-export="true"
         :columns="columns"
         :paginate="true"
-        :rows="rows"
+        :rows="dtData"
         :defaultSortBy="{field: 'age', type: 'asc'}">
             <template slot="table-row" scope="props">
                 <td class="left-align">{{ props.row.name }}</td>
                 <td class="right-align">{{ props.formattedRow.age }}</td>
                 <td class="right-align">{{ props.formattedRow.joined }}</td>
                 <td class="left-align">
-                    edit {{ props.row.name }}
+                    <button @click="showModal(props)">edit {{ props.row.name }}</button>
                 </td>
             </template>
         </data-table>
 
         <hr/>
 
-        <button @click="showModal">edit</button>
-        <modal name="hello-world">
-            hello, world!
-        </modal>
+        <modal class="vue-dialog" name="modal-com"
+        height="auto"
+        :scrollable="true"
+        :adaptive="true">
+            <div class="dialog-content">
+                {{modalData}}
+            </div>
+            <div class="vue-dialog-buttons">
+                <button class="vue-dialog-button" style="flex: 1 1 50%;">Ok</button>
+                <button class="vue-dialog-button" style="flex: 1 1 50%;">Close</button>
+            </div>
+        </v-dialog>
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
@@ -59,23 +67,30 @@
             components: {VCom},
             data: function(){
                 return {
-                    value: [],
-                    options: [ {
-                        id: 'a',
-                        label: 'a',
-                        children: [ {
-                        id: 'aa',
-                        label: 'aa',
-                        }, {
-                        id: 'ab',
-                        label: 'ab',
-                        } ],
-                    }, {
-                        id: 'b',
-                        label: 'b',
-                    } ],
+                    modalData: null,
+                    tsData: [],
+                    options: [
+                        {
+                            id: 'a',
+                            label: 'a',
+                            children: [
+                                {
+                                    id: 'aa',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: 'ab',
+                                    label: 'ab',
+                                }
+                            ],
+                        },
+                        {
+                            id: 'b',
+                            label: 'b',
+                        }
+                    ],
                     //
-                    rangeTime: '',
+                    dpData: '',
                     //
                     columns: [
                         {
@@ -98,8 +113,8 @@
                         {
                             label: 'Action'
                         },
-                        ],
-                    rows: [
+                    ],
+                    dtData: [
                         {name:"John", age:20, joined: '20120201'},
                         {name:"Jane", age:24, joined: '20120305'},
                         {name:"Susan", age:16, joined: '20140823'},
@@ -108,9 +123,18 @@
                     ],
                 }
             },
+            watch: {
+                tsData: function (val, oldVal) {
+                    console.log(val, oldVal)
+                },
+                dpData: function (val, oldVal) {
+                    console.log(val, oldVal)
+                },
+            },
             methods: {
-                showModal () {
-                    this.$modal.show('hello-world');
+                showModal (item) {
+                    this.modalData = item.row.name;
+                    this.$modal.show('modal-com')
                 }
             },
 
