@@ -316,7 +316,7 @@ export default {
 .datepicker {
   position: relative;
   display: inline-block;
-  color:#73879c;
+  color:#333;
   font: 14px/1.5 "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", sans-serif;
 }
 
@@ -351,6 +351,7 @@ export default {
   background-color: #fff;
   border: 1px solid #ddd;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+  cursor: pointer;
 }
 
 .input-icon {
@@ -419,7 +420,7 @@ export default {
 }
 .datepicker-btn-confirm {
   border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #73879c;
+  color: #333;
 }
 .datepicker-btn-confirm:hover {
   color: #1284e7;

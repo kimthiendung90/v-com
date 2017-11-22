@@ -11,7 +11,7 @@
         </div>
       </div>
 
-      <table ref="table" class="table">
+      <table ref="table" :class="['table', rtl ? 'right-align' : 'left-align']">
         <thead>
           <tr v-if="globalSearch && externalSearchQuery == null">
             <td :colspan="lineNumbers ? columns.length + 1: columns.length">
@@ -113,7 +113,6 @@
       <vue-good-pagination
         v-if="paginate"
         :perPage="perPage"
-        :rtl="rtl"
         :total="processedRows.length"
         @page-changed="pageChanged"
         @per-page-changed="perPageChanged"></vue-good-pagination>
@@ -343,11 +342,8 @@ export default {
     //Get classes for the given column index & element.
     getClasses(index, element) {
       const { type, [element + "Class"]: custom } = this.columns[index];
-      let isRight = ["number", "percentage", "decimal", "date"].includes(type);
-      if (this.rtl) isRight = true;
+  
       const classes = {
-        "right-align": isRight,
-        "left-align": !isRight,
         [custom]: !!custom
       };
       return classes;
@@ -680,11 +676,11 @@ table {
 .table {
   width: 100%;
   max-width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
-.table-striped .table tbody tr:nth-of-type(odd) {
-  background-color: rgba(35, 41, 53, 0.02);
+.table-striped .table tbody tr:nth-of-type(even) {
+  background-color: rgba(35, 41, 53, 0.025);
 }
 
 .table tbody tr:hover {
@@ -702,6 +698,9 @@ table {
   padding: 0.75rem 1.2rem 0.75rem 0.75rem;
   vertical-align: top;
   border-top: 1px solid #ddd;
+}
+.table td, .table td *{
+  word-break: break-all;
 }
 
 .rtl .table td,
@@ -744,10 +743,15 @@ tr.clickable {
   background-color: #fff;
   background-image: none;
   border: 1px solid #ccc;
+  outline: 0;
 }
 
 .table input {
   box-shadow: inset 0 1px 1px rgba(35, 41, 53, 0.075);
+}
+.table input:focus{
+  border: 1px solid #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
 }
 
 table th.sorting-asc,

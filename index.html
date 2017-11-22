@@ -30,15 +30,17 @@
         style-class="table table-bordered table-striped"
         title="dassad"
         csv-export="true"
+        rtl="true"
+        :global-search="true"
         :columns="columns"
         :paginate="true"
         :rows="dtData"
         :defaultSortBy="{field: 'age', type: 'asc'}">
             <template slot="table-row" scope="props">
-                <td class="left-align">{{ props.row.name }}</td>
-                <td class="right-align">{{ props.formattedRow.age }}</td>
-                <td class="right-align">{{ props.formattedRow.joined }}</td>
-                <td class="left-align">
+                <td>{{ props.row.name }}</td>
+                <td>{{ props.formattedRow.age }}</td>
+                <td>{{ props.formattedRow.joined }}</td>
+                <td>
                     <button @click="showModal(props)">edit {{ props.row.name }}</button>
                 </td>
             </template>
@@ -51,13 +53,13 @@
         :scrollable="true"
         :adaptive="true">
             <div class="dialog-content">
-                {{modalData}}
+                {{mData}}
             </div>
             <div class="vue-dialog-buttons">
                 <button class="vue-dialog-button" style="flex: 1 1 50%;">Ok</button>
                 <button class="vue-dialog-button" style="flex: 1 1 50%;">Close</button>
             </div>
-        </v-dialog>
+        </modal>
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
@@ -67,7 +69,7 @@
             components: {VCom},
             data: function(){
                 return {
-                    modalData: null,
+                    mData: null,
                     tsData: [],
                     options: [
                         {
@@ -120,6 +122,16 @@
                         {name:"Susan", age:16, joined: '20140823'},
                         {name:"Chris", age:55, joined: '20161109'},
                         {name:"Dan", age:40, joined: '20170612'},
+                        {name:"John", age:20, joined: '20120201'},
+                        {name:"Jane", age:24, joined: '20120305'},
+                        {name:"Susan", age:16, joined: '20140823'},
+                        {name:"Chris", age:55, joined: '20161109'},
+                        {name:"Dan", age:40, joined: '20170612'},
+                        {name:"John", age:20, joined: '20120201'},
+                        {name:"Jane", age:24, joined: '20120305'},
+                        {name:"Susan", age:16, joined: '20140823'},
+                        {name:"Chris", age:55, joined: '20161109'},
+                        {name:"Dan", age:40, joined: '20170612'},
                     ],
                 }
             },
@@ -133,7 +145,7 @@
             },
             methods: {
                 showModal (item) {
-                    this.modalData = item.row.name;
+                    this.mData = item.row.name;
                     this.$modal.show('modal-com')
                 }
             },

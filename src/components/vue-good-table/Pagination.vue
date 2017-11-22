@@ -18,14 +18,14 @@
     <div class="pagination-controls pull-right">
       <a href="javascript:undefined" class="page-btn"  :class="{ disabled: !prevIsPossible }"
          @click.prevent.stop="previousPage" tabindex="0">
-        <span class="chevron" v-bind:class="{ 'left': !rtl, 'right': rtl }"></span>
+        <span class="chevron left"></span>
         <span>{{prevText}}</span>
       </a>
       <div class="info">{{paginatedInfo}}</div>
       <a href="javascript:undefined" class="page-btn"
          :class="{ disabled: !nextIsPossible }" @click.prevent.stop="nextPage" tabindex="0">
         <span>{{nextText}}</span>
-        <span class="chevron" v-bind:class="{ 'right': !rtl, 'left': rtl }"></span>
+        <span class="chevron right"></span>
       </a>
     </div>
   </div>
@@ -38,7 +38,6 @@
       styleClass: {default: 'table table-bordered'},
       total: {default: null},
       perPage: {},
-      rtl: {default: false},
 
       // text options
       nextText: {default: 'Next'},
@@ -175,6 +174,7 @@
     font-size: 14px;
     font-weight: 600;
     opacity: 0.8;
+    outline: 0;
   }
 
   .pagination-controls a.disabled,
