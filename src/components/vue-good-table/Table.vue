@@ -764,20 +764,15 @@ table th.sorting:after,
 table th.sorting-asc:after {
   font-family: "Material Icons";
   position: absolute;
+  top: 50%;
+  margin-top: -6px;
+  margin-left: 4px;
   height: 0px;
   width: 0px;
   content: "";
   display: none;
   border: 4px solid transparent;
   border-bottom: 6px solid rgba(0, 0, 0, 0.6);
-  margin-top: 2px;
-  margin-left: 4px;
-}
-
-.rtl table th.sorting:after,
-.rtl table th.sorting-asc:after {
-  margin-right: 4px;
-  margin-left: 0;
 }
 
 table th.sorting-asc:after,
@@ -790,7 +785,7 @@ table th.sorting-desc:after {
   border-bottom-color: transparent;
   border: 4px solid transparent;
   border-top: 6px solid rgba(0, 0, 0, 0.6);
-  margin-top: 6px;
+  margin-top: -2px;
 }
 
 .responsive {
