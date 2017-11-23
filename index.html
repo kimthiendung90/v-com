@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <title>Component Framework</title>
     <link rel="stylesheet" href="./dist/v-com.css">
+    
 </head>
 
 <body>
@@ -15,6 +16,15 @@
         :options="options"
         placeholder="Select your favourite(s)..."
         v-model="tsData">
+        </tree-select>
+
+        <hr/>
+
+        <tree-select
+        :multiple="false"
+        :options="options2"
+        placeholder="Select your favourite(s)..."
+        v-model="tsData2">
         </tree-select>
 
         <hr/>
@@ -60,6 +70,7 @@
                 <button class="vue-dialog-button" style="flex: 1 1 50%;">Close</button>
             </div>
         </modal>
+        
     </div>
     <script src="./core/vue.min.js"></script>
     <script src="./dist/v-com.browser.js"></script>
@@ -71,19 +82,110 @@
                 return {
                     mData: null,
                     tsData: [],
+                    tsData2: [],
+                    options2: [
+                                {
+                                    id: '1g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '2g',
+                                    label: 'ab',
+                                },
+                                {
+                                    id: '3g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '4g',
+                                    label: 'ab',
+                                },
+                                {
+                                    id: '5g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '6g',
+                                    label: 'ab',
+                                },
+                                {
+                                    id: '7g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '8g',
+                                    label: 'ab',
+                                },
+                                {
+                                    id: '9g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '10g',
+                                    label: 'ab',
+                                },
+                                {
+                                    id: '11g',
+                                    label: 'aa',
+                                },
+                                {
+                                    id: '12g',
+                                    label: 'ab',
+                                }
+                            ],
                     options: [
                         {
                             id: 'a',
                             label: 'a',
                             children: [
-                                {
-                                    id: 'aa',
-                                    label: 'aa',
-                                },
-                                {
-                                    id: 'ab',
-                                    label: 'ab',
-                                }
+                            {
+                                id: '1',
+                                label: 'aa',
+                            },
+                            {
+                                id: '2',
+                                label: 'ab',
+                            },
+                            {
+                                id: '3',
+                                label: 'aa',
+                            },
+                            {
+                                id: '4',
+                                label: 'ab',
+                            },
+                            {
+                                id: '5',
+                                label: 'aa',
+                            },
+                            {
+                                id: '6',
+                                label: 'ab',
+                            },
+                            {
+                                id: '7',
+                                label: 'aa',
+                            },
+                            {
+                                id: '8',
+                                label: 'ab',
+                            },
+                            {
+                                id: '9',
+                                label: 'aa',
+                            },
+                            {
+                                id: '10',
+                                label: 'ab',
+                            },
+                            {
+                                id: '11',
+                                label: 'aa',
+                            },
+                            {
+                                id: '12',
+                                label: 'ab',
+                            }
                             ],
                         },
                         {
