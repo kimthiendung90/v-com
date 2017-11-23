@@ -629,7 +629,7 @@
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.2);
-    z-index: 999;
+    z-index: 9999;
     opacity: 1;
   }
 

@@ -202,7 +202,7 @@ export default {
       var mimeType = "data:text/csv;charset=utf-8";
       if (Array.isArray(this.rows) && this.rows.length > 0) {
 
-        const docName = this.title != "" ? this.title.replace(/ /g, "-") : "Csv";
+        const docName = this.title ? this.title.replace(/ /g, "-") : "Csv";
         const d = new Date();
 
         var content = this.convertToCSV({data: this.rows});
@@ -868,5 +868,17 @@ table th.line-numbers,
 .table .btn:active{
   background-color: #1976D2;
   color: #fff;
+}
+@media (max-width: 767px) {
+  .table thead tr:first-child{
+    border-top: 1px solid #ddd;
+  }
+  .table td, .table th {
+    display: block;
+    border-top: 0 !important;
+  }
+  .table tbody tr {
+    border-top: 4px double #ddd;
+  }
 }
 </style>
