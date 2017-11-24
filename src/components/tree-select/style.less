@@ -7,6 +7,7 @@
 /**
  * Variables
  */
+@treeselect-icon-size-extend: 18px; //not change
 @treeselect-icon-size: 1em;
 @treeselect-font-size: 1em;
 @treeselect-padding: 3px;
@@ -63,7 +64,7 @@
 @treeselect-arrow-transition-timing-function: ease-out-expo;
 
 @treeselect-clear-color: @treeselect-arrow-color;
-@treeselect-clear-font-size: floor(@treeselect-control-height / 2);
+@treeselect-clear-font-size: 1.5em;
 // Arial is ideal for the character "×" and available across all platforms
 @treeselect-clear-font-family: Arial, sans-serif;
 @treeselect-clear-color-hover: @palette-Red-600;
@@ -833,8 +834,8 @@
   .rounded();
 
   position: relative;
-  width: @treeselect-icon-size;
-  height: @treeselect-icon-size;
+  width: @treeselect-icon-size-extend;
+  height: @treeselect-icon-size-extend;
   background: @treeselect-warning-icon-bg;
 
   &::after {
@@ -890,8 +891,8 @@
   .icon();
 
   position: relative;
-  width: @treeselect-icon-size;
-  height: @treeselect-icon-size;
+  width: @treeselect-icon-size-extend;
+  height: @treeselect-icon-size-extend;
   text-align: center;
   animation: @treeselect-loader-animation-duration vue-treeselect-animation-rotate linear infinite;
 

@@ -36,6 +36,10 @@
 
         <hr/>
 
+        <date-picker v-model="dpData2" confirm></date-picker>
+
+        <hr/>
+
         <data-table
         style-class="table table-bordered table-striped"
         title="dassad"
@@ -81,8 +85,8 @@
             data: function(){
                 return {
                     mData: null,
-                    tsData: [],
-                    tsData2: [],
+                    tsData: null,
+                    tsData2: null,
                     options2: [
                                 {
                                     id: '1g',
@@ -195,6 +199,7 @@
                     ],
                     //
                     dpData: '',
+                    dpData2: '',
                     //
                     columns: [
                         {
