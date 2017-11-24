@@ -2,6 +2,7 @@ import DatePicker from './components/vue2-datepicker'
 import DataTable from './components/vue-good-table/Table.vue';
 import TreeSelect from './components/tree-select/index.js';
 import Modal from './components/modal/index.js';
+import {Checkbox, Radio} from './components/checkbox-radio/index.js';
 
 // Install the components
 export function install (Vue) {
@@ -9,6 +10,8 @@ export function install (Vue) {
   Vue.component('dataTable', DataTable);
   Vue.component('treeSelect', TreeSelect);
   Vue.use(Modal, { componentName: "modal", dialog: true });
+  Vue.component('checkbox', Checkbox);
+  Vue.component('radio', Radio);
   /* -- Add more components here -- */
 }
 
@@ -18,6 +21,8 @@ export {
   DataTable,
   TreeSelect,
   Modal,
+  Checkbox,
+  Radio,
   /* -- Add more components here -- */
 }
 
