@@ -1,47 +1,59 @@
 <style lang="scss">
     .radio-component {
         > input {
-            opacity: 0;
             position: absolute;
+            border: 0;
+            margin: 0;
+            opacity: 0;
+            background: transparent;
 
             + label > .input-box {
                 display: inline-block;
-                border: 1px solid #000;
-                border-radius: 50%;
                 margin: 0;
                 padding: 0;
-                width: 1em;
-                height: 1em;
-                background: #fff;
                 overflow: hidden;
-                vertical-align: -5%;
                 user-select: none;
+                position: relative;
+                border: 1px solid #aaa;
+                border-radius: 1em;
+                width: 3em;
+                height: 1.5em;
+                background: #fff;
+                transition: background .2s ease-in;
+                vertical-align: -.5em;
 
-                > .input-box-circle {
-                    display: block;
-                    margin: 50%;
-                    width: 0%;
-                    height: 0%;
-                    background: #000;
-                    border-radius: 50%;
-                    opacity: 0;
-                    transition: width 0.15s ease-in, height 0.15s ease-in, margin 0.15s ease-in;
-                }
             }
 
-            &:checked + label > .input-box > .input-box-circle {
-                opacity: 1;
-                margin: 22%;
-                width: 56%;
-                height: 56%;
+            + label > .input-box::before{
+                content: "";
+                position: absolute;
+                top: -1px;
+                left: -1px;
+                border: 1px solid #aaa;
+                border-radius: 50%;
+                width: 1.5em;
+                height: 1.5em;
+                background: #fff;
+                transition: transform .3s ease-out;
+            }
+
+            &:checked + label > .input-box {
+                background: #63b65d;
+                border-color: #498d47;
+            }
+
+            &:checked + label > .input-box::before{
+                border-color: #498d47;
+                transform: translateX(1.5em);
             }
 
             &:focus + label > .input-box {
-                box-shadow: 0 0 2px 3px #73b9ff;
+                box-shadow: 0 0 0 3px rgba(71,210,25,.1);
             }
 
-            &:disabled + label {
-                opacity: 0.7;
+            &:disabled + label > .input-box {
+                opacity: .7;
+                background-color: #aaa;
             }
         }
     }
@@ -61,7 +73,6 @@
         <label :for="id">
             <slot name="input-box">
                 <span class="input-box">
-                    <span class="input-box-circle"></span>
                 </span>
             </slot>
             <slot></slot>

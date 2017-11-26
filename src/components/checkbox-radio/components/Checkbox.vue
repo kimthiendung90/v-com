@@ -1,26 +1,26 @@
 <style lang="scss">
     .checkbox-component {
         > input {
-            opacity: 0;
             position: absolute;
+            border: 0;
+            margin: 0;
+            opacity: 0;
+            background: transparent;
 
             + label > .input-box {
                 display: inline-block;
                 margin: 0;
                 padding: 0;
-                background: #fff;
                 overflow: hidden;
-                vertical-align: -5%;
                 user-select: none;
-
                 position: relative;
-                border: 1px solid #939393;
+                border: 1px solid #aaa;
                 border-radius: 1em;
                 width: 3em;
                 height: 1.5em;
                 background: #fff;
                 transition: background .2s ease-in;
-                vertical-align: -15%;
+                vertical-align: -.5em;
 
             }
 
@@ -29,7 +29,7 @@
                 position: absolute;
                 top: -1px;
                 left: -1px;
-                border: 1px solid #939393;
+                border: 1px solid #aaa;
                 border-radius: 50%;
                 width: 1.5em;
                 height: 1.5em;
@@ -38,20 +38,22 @@
             }
 
             &:checked + label > .input-box {
-                background: #63b65d;
+                background: #03a9f4;
+                border-color: #1976d2;
             }
 
             &:checked + label > .input-box::before{
-                border-color: #498d47;
+                border-color: #1976d2;
                 transform: translateX(1.5em);
             }
 
             &:focus + label > .input-box {
-                box-shadow: 0 0 2px 3px rgba(115, 185, 255, 0.69);
+                box-shadow: 0 0 0 3px rgba(25,118,210,.1);
             }
 
-            &:disabled + label {
-                opacity: 0.7;
+            &:disabled + label > .input-box {
+                opacity: .7;
+                background-color: #aaa;
             }
         }
     }
