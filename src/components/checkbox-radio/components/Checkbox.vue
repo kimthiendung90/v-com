@@ -48,7 +48,7 @@
             }
 
             &:focus + label > .input-box {
-                box-shadow: 0 0 0 3px rgba(25,118,210,.1);
+                box-shadow: 0 0 0 3px rgba(25,118,210,.2);
             }
 
             &:disabled + label > .input-box {

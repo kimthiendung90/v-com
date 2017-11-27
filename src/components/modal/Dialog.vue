@@ -153,4 +153,9 @@
   .vue-dialog-button:not(:first-of-type) {
     border-left: 1px solid #eee;
   }
+
+  .vue-dialog-button.blue{
+    color: #fff;
+    background-color: #2185d0;
+  }
 </style>

@@ -17,6 +17,7 @@
              :style="modalStyle"
              @mousedown.stop
              @touchstart.stop>
+          <div v-if="closeButton" class="v--modal-close" @click="hide"></div>
           <slot/>
           <resizer v-if="resizable && !isAutoHeight"
                    :min-width="minWidth"
@@ -70,6 +71,10 @@
       clickToClose: {
         type: Boolean,
         default: true
+      },
+      closeButton: {
+        type: Boolean,
+        default: false,
       },
       classes: {
         type: [String, Array],
@@ -369,6 +374,9 @@
        * if "reset" flag is set to true - this function will be called
        * every time "beforeOpen" is triggered
        */
+      hide () {
+        this.toggle(false)
+      },
       setInitialSize () {
         let { modal } = this
         let width = parseNumber(this.width)
@@ -642,6 +650,7 @@
   }
 
   .v--modal-overlay .v--modal-box {
+    padding: 1em;
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
@@ -690,5 +699,27 @@
   .nice-modal-fade-enter, .nice-modal-fade-leave-active {
     opacity: 0;
     transform: translateY(-20px);
+  }
+  .v--modal-close {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.5em;
+    height: 2.5em;
+    text-align: center;
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 0 3px;
+  }
+  .v--modal-close::before{
+    content: "\2715";
+    font-size: 2em;
+    line-height: 1.25em;
+  }
+  .v--modal-close:hover{
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #000;
   }
 </style>

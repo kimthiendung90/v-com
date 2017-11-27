@@ -11,7 +11,7 @@
         </div>
       </div>
 
-      <table ref="table" :class="['table', rtl ? 'right-align' : 'left-align']">
+      <table ref="table" :class="['v-table', rtl ? 'right-align' : 'left-align']">
         <thead>
           <tr v-if="globalSearch && externalSearchQuery == null">
             <td :colspan="lineNumbers ? columns.length + 1: columns.length">
@@ -635,10 +635,6 @@ export default {
 <style lang="css">
 /* Utility styles
 ************************************************/
-.actions{
-  margin-bottom: .4rem;
-}
-
 .right-align {
   text-align: right;
 }
@@ -665,178 +661,18 @@ export default {
   clear: both;
 }
 
-/* Table specific styles
-************************************************/
-
-table {
-  border-collapse: collapse;
-  background-color: transparent;
-  margin-bottom: 0px;
-}
-.table {
-  width: 100%;
-  max-width: 100%;
-  table-layout: fixed;
-}
-
-.table-striped .table tbody tr:nth-of-type(even) {
-  background-color: rgba(35, 41, 53, 0.025);
-}
-
-.table tbody tr:hover {
-  background-color: rgba(188, 215, 241, 0.3) !important;
-}
-
-.table-bordered .table td,
-.table-bordered th,
-.table-bordered .table-footer {
-  border: 1px solid #ddd;
-}
-
-.table td,
-.table th:not(.line-numbers) {
-  padding: 0.75rem 1.2rem 0.75rem 0.75rem;
-  vertical-align: top;
-  border-top: 1px solid #ddd;
-}
-.table td, .table td *{
-  word-break: break-all;
-}
-
-.rtl .table td,
-.rtl .table th:not(.line-numbers) {
-  padding: 0.75rem;
-}
-
-.table.condensed td,
-.table.condensed th {
-  padding: 0.4rem 0.4rem 0.4rem 0.4rem;
-}
-
-.table thead th,
-.table.condensed thead th {
-  cursor: pointer;
-  vertical-align: bottom;
-  padding-right: 1.5rem;
-  background-color: rgba(35, 41, 53, 0.05);
-}
-.rtl .table thead th,
-.rtl .table.condensed thead th {
-  padding-left: 1rem;
-  padding-right: 0.75rem;
-}
-
-tr.clickable {
-  cursor: pointer;
-}
-
-.table input,
-.table select {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  height: 28px;
-  padding: 5px 10px;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #555;
-  background-color: #fff;
-  background-image: none;
-  border: 1px solid #ccc;
-  outline: 0;
-}
-
-.table input {
-  box-shadow: inset 0 1px 1px rgba(35, 41, 53, 0.075);
-}
-.table input:focus{
-  border: 1px solid #1976d2;
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-}
-
-table th.sorting-asc,
-table th.sorting-desc {
-  color: rgba(0, 0, 0, 0.7);
-  position: relative;
-}
-
-table th.sorting:after,
-table th.sorting-asc:after {
-  font-family: "Material Icons";
-  position: absolute;
-  top: 50%;
-  margin-top: -6px;
-  margin-left: 4px;
-  height: 0px;
-  width: 0px;
-  content: "";
-  display: none;
-  border: 4px solid transparent;
-  border-bottom: 6px solid rgba(0, 0, 0, 0.6);
-}
-
-table th.sorting-asc:after,
-table th.sorting-desc:after,
-table th.sorting:hover:after {
-  display: inline-block;
-}
-
-table th.sorting-desc:after {
-  border-bottom-color: transparent;
-  border: 4px solid transparent;
-  border-top: 6px solid rgba(0, 0, 0, 0.6);
-  margin-top: -2px;
-}
-
 .responsive {
   width: 100%;
 }
 
-/* Table header specific styles
-************************************************/
-
-.table-header {
-  padding: 0.75rem;
-}
-
-.table-header .table-title {
-  margin: 0px;
-  font-size: 18px;
-}
-
-/* Global Search
-  **********************************************/
-.global-search {
-  position: relative;
-  margin-left: 0.45rem;
-}
-table .global-search-input {
-  width: 100%;
-}
-
-/* Line numbers
-  **********************************************/
-table th.line-numbers,
-.table.condensed th.line-numbers {
-  background-color: rgba(35, 41, 53, 0.05);
-  padding-left: 3px;
-  padding-right: 3px;
-  word-wrap: break-word;
-  width: 45px;
-  text-align: center;
-}
-
-.good-table.rtl {
-  direction: rtl;
-}
-
-.text-disabled {
-  color: #aaa;
-}
 
 /* button
   **********************************************/
-.table .btn {
+.good-table .actions{
+  margin-bottom: .4rem;
+}
+
+.good-table .btn {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -861,23 +697,190 @@ table th.line-numbers,
   vertical-align: middle;
   white-space: nowrap;
 }
-.table .btn:focus,.table .btn:hover {
+.good-table .btn:focus,.v-table .btn:hover {
   background: #f1f1fc;
   text-decoration: none;
 }
-.table .btn:active{
+.good-table .btn:active{
   background-color: #1976D2;
   color: #fff;
 }
+
+/* Table specific styles
+************************************************/
+
+.v-table {
+  border-collapse: collapse;
+  background-color: transparent;
+  margin-bottom: 0px;
+}
+.v-table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+.table-striped .v-table tbody tr:nth-of-type(even) {
+  background-color: rgba(35, 41, 53, 0.025);
+}
+
+.v-table tbody tr:hover {
+  background-color: rgba(188, 215, 241, 0.3) !important;
+}
+
+.table-bordered .v-table td,
+.table-bordered .v-table th,
+.table-bordered .v-table .table-footer {
+  border: 1px solid #ddd;
+}
+
+.v-table td,
+.v-table th:not(.line-numbers) {
+  padding: 0.75rem 1.2rem 0.75rem 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.v-table td, .v-table td *{
+  word-break: break-all;
+}
+
+.rtl .v-table td,
+.rtl .v-table th:not(.line-numbers) {
+  padding: 0.75rem;
+}
+
+.v-table.condensed td,
+.v-table.condensed th {
+  padding: 0.4rem 0.4rem 0.4rem 0.4rem;
+}
+
+.v-table thead th,
+.v-table.condensed thead th {
+  cursor: pointer;
+  vertical-align: bottom;
+  padding-right: 1.5rem;
+  background-color: rgba(35, 41, 53, 0.05);
+}
+.rtl .v-table thead th,
+.rtl .v-table.condensed thead th {
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
+
+.v-table tr.clickable {
+  cursor: pointer;
+}
+
+.v-table input,
+.v-table select {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 28px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  outline: 0;
+}
+
+.v-table input {
+  box-shadow: inset 0 1px 1px rgba(35, 41, 53, 0.075);
+}
+.v-table input:focus{
+  border: 1px solid #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.v-table th.sorting-asc,
+.v-table th.sorting-desc {
+  color: rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.v-table th.sorting:after,
+.v-table th.sorting-asc:after {
+  font-family: "Material Icons";
+  position: absolute;
+  top: 50%;
+  margin-top: -6px;
+  margin-left: 4px;
+  height: 0px;
+  width: 0px;
+  content: "";
+  display: none;
+  border: 4px solid transparent;
+  border-bottom: 6px solid rgba(0, 0, 0, 0.6);
+}
+
+.v-table th.sorting-asc:after,
+.v-table th.sorting-desc:after,
+.v-table th.sorting:hover:after {
+  display: inline-block;
+}
+
+.v-table th.sorting-desc:after {
+  border-bottom-color: transparent;
+  border: 4px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.6);
+  margin-top: -2px;
+}
+
+/* Table header specific styles
+************************************************/
+
+.v-table .table-header {
+  padding: 0.75rem;
+}
+
+.v-table .table-header .table-title {
+  margin: 0px;
+  font-size: 18px;
+}
+
+/* Global Search
+  **********************************************/
+.v-table .global-search {
+  position: relative;
+  margin-left: 0.45rem;
+}
+.v-table .global-search-input {
+  width: 100%;
+}
+
+/* Line numbers
+  **********************************************/
+.v-table th.line-numbers,
+.v-table.condensed th.line-numbers {
+  background-color: rgba(35, 41, 53, 0.05);
+  padding-left: 3px;
+  padding-right: 3px;
+  word-wrap: break-word;
+  width: 45px;
+  text-align: center;
+}
+
+.good-table.rtl {
+  direction: rtl;
+}
+
+.text-disabled {
+  color: #aaa;
+}
+
+
 @media (max-width: 767px) {
-  .table thead tr:first-child{
+  .v-table thead tr:first-child{
     border-top: 1px solid #ddd;
   }
-  .table td, .table th {
+  .v-table td, .v-table th {
     display: block;
     border-top: 0 !important;
   }
-  .table tbody tr {
+  .v-table tbody tr {
     border-top: 4px double #ddd;
   }
 }
